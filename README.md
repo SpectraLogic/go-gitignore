@@ -1,5 +1,7 @@
 # go-gitignore [![Build Status](https://travis-ci.org/monochromegane/go-gitignore.svg)](https://travis-ci.org/monochromegane/go-gitignore)
 
+**ABOUT THIS FORK:** All this changes is that Match() now works recursively - this means that `hello/` will match `hello/world` now!
+
 A fast gitignore matching library for Go.
 
 This library use simple tree index for matching, so keep fast if gitignore file has many pattern.

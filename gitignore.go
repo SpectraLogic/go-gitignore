@@ -48,10 +48,11 @@ func NewGitIgnoreFromReader(path string, r io.Reader) gitIgnore {
 			continue
 		}
 
+		line = fixPath(line)
 		if strings.HasPrefix(line, "!") {
-			g.acceptPatterns.add(strings.TrimPrefix(line, "!"))
+			g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
 		} else {
-			g.ignorePatterns.add(line)
+			g.ignorePatterns.add(fixRootPrefix(line))
 		}
 	}
 	return g
@@ -63,6 +64,7 @@ func (g gitIgnore) Match(path string, isDir bool) bool {
 		return false
 	}
 
+	relativePath = fixPath(relativePath)
 	if g.acceptPatterns.match(relativePath, isDir) {
 		return false
 	}

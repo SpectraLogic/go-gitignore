@@ -1,6 +1,8 @@
 package gitignore
 
 import (
+	"fmt"
+	"runtime"
 	"os"
 	"strings"
 )
@@ -42,4 +44,32 @@ func cutLastN(path string, n int) (string, bool) {
 
 func hasMeta(path string) bool {
 	return strings.IndexAny(path, "*?[") >= 0
+}
+
+const isWindows bool = runtime.GOOS == "windows"
+
+func fixRootPrefix(path string) string {
+	if (isWindows) {
+		if (len(path) >=3) {
+			prefix := path[1:3]
+			hasWindowsRootPrefix := prefix == ":/" || prefix == ":\\"
+			if hasWindowsRootPrefix {
+				driveLetter := path[0:1]
+				pathTail := path[3:]
+				return fmt.Sprintf("/%v/%v", driveLetter, pathTail)
+			}
+		}
+
+		return path
+	}
+
+	return path
+}
+
+func fixPath(path string) string {
+	if (isWindows) {
+		return strings.Replace(path, "\\", "/", -1)
+	}
+
+	return path
 }

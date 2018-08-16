@@ -1,11 +1,11 @@
 package gitignore
 
 import (
-	"path/filepath"
 	"strings"
 )
 
-var Separator = string(filepath.Separator)
+// Separator fixed value "/"
+var Separator = string("/")
 
 type pattern struct {
 	hasRootPrefix     bool

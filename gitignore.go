@@ -58,6 +58,27 @@ func NewGitIgnoreFromReader(path string, r io.Reader) gitIgnore {
 	return g
 }
 
+func NewGitIgnoreFromStrings(path string, patterns []string) gitIgnore {
+	g := gitIgnore{
+		ignorePatterns: newIndexScanPatterns(),
+		acceptPatterns: newIndexScanPatterns(),
+		path:           path,
+	}
+	for _, line := range patterns {
+		line := strings.Trim(line, " ")
+		if len(line) == 0 || strings.HasPrefix(line, "#") {
+			continue
+		}
+		line = fixPath(line)
+		if strings.HasPrefix(line, "!") {
+			g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
+		} else {
+			g.ignorePatterns.add(fixRootPrefix(line))
+		}
+	}
+	return g
+}
+
 func (g gitIgnore) Match(path string, isDir bool) bool {
 	relativePath, err := filepath.Rel(g.path, path)
 	_ = "breakpoint"

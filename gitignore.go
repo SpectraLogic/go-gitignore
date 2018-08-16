@@ -66,8 +66,29 @@ func (g gitIgnore) Match(path string, isDir bool) bool {
 	}
 
 	relativePath = fixPath(relativePath)
-	if g.acceptPatterns.match(relativePath, isDir) {
-		return false
+	pbuild := ""
+	pdir := true
+	for _, p := range strings.Split(relativePath, "/") {
+		// Get path up to a specific depth
+		if pbuild == "" {
+			pbuild += p
+		} else {
+			pbuild += "/" + p
+		}
+
+		// Everything except for the last element is a directory
+		if pbuild == relativePath {
+			pdir = isDir
+		}
+
+		// Try accepted patterns (which never match)
+		if g.acceptPatterns.match(pbuild, pdir) {
+			return false
+		}
+		// Try ignored patterns (which match if there's no matching accepted pattern)
+		if g.ignorePatterns.match(pbuild, pdir) {
+			return true
+		}
 	}
-	return g.ignorePatterns.match(relativePath, isDir)
+	return false
 }

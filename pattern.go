@@ -27,7 +27,7 @@ func newPattern(path string) pattern {
 	var matcher pathMatcher
 	matchingPath := strings.Trim(path, "/")
 	if hasMeta(path) {
-		matcher = filepathMatcher{path: matchingPath}
+		matcher = newGlobMatcher(matchingPath)
 	} else {
 		matcher = simpleMatcher{path: matchingPath}
 	}

@@ -60,6 +60,7 @@ func NewGitIgnoreFromReader(path string, r io.Reader) gitIgnore {
 
 func (g gitIgnore) Match(path string, isDir bool) bool {
 	relativePath, err := filepath.Rel(g.path, path)
+	_ = "breakpoint"
 	if err != nil {
 		return false
 	}

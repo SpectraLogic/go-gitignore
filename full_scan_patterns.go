@@ -15,12 +15,17 @@ func newFullScanPatterns() *fullScanPatterns {
 	}
 }
 
-func (ps *fullScanPatterns) add(pattern string) {
-	if strings.HasPrefix(pattern, "/") {
-		ps.absolute.add(newPattern(pattern))
-	} else {
-		ps.relative.add(newPattern(pattern))
+func (ps *fullScanPatterns) add(pattern string) error {
+	newPattern, err := newPattern(pattern)
+	if err != nil {
+		return err
 	}
+	if strings.HasPrefix(pattern, "/") {
+		ps.absolute.add(*newPattern)
+	} else {
+		ps.relative.add(*newPattern)
+	}
+	return nil
 }
 
 func (ps fullScanPatterns) match(path string, isDir bool) bool {

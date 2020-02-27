@@ -16,16 +16,21 @@ func newInitialPatternHolder() initialPatternHolder {
 	}
 }
 
-func (h *initialPatternHolder) add(pattern string) {
+func (h *initialPatternHolder) add(pattern string) error {
 	trimmedPattern := strings.TrimPrefix(pattern, "/")
 	if len(trimmedPattern) == 0 {
-		return
+		return nil
+	}
+	newPattern, err := newPatternForEqualizedPath(pattern)
+	if err != nil {
+		return err
 	}
 	if strings.IndexAny(trimmedPattern[0:1], initials) != -1 {
-		h.patterns.set(trimmedPattern[0], newPatternForEqualizedPath(pattern))
+		h.patterns.set(trimmedPattern[0], *newPattern)
 	} else {
-		h.otherPatterns.add(newPatternForEqualizedPath(pattern))
+		h.otherPatterns.add(*newPattern)
 	}
+	return nil
 }
 
 func (h initialPatternHolder) match(path string, isDir bool) bool {

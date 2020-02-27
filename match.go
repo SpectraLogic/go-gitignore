@@ -32,12 +32,16 @@ type globMatcher struct {
 	glob glob.Glob
 }
 
-func newGlobMatcher(path string) globMatcher {
+func newGlobMatcher(path string) (*globMatcher, error) {
+	matcher, err := glob.Compile(path, os.PathSeparator)
+	if err != nil {
+		return nil, err
+	}
 	g := globMatcher{
 		path: path,
-		glob: glob.MustCompile(path, os.PathSeparator),
+		glob: matcher,
 	}
-	return g
+	return &g, nil
 }
 
 func (m globMatcher) match(path string) bool {

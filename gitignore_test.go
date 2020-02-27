@@ -51,10 +51,21 @@ func TestMatch(t *testing.T) {
 	}
 
 	for _, assert := range asserts {
-		gi := NewGitIgnoreFromReader(".", strings.NewReader(strings.Join(assert.patterns, "\n")))
+		gi, err := NewGitIgnoreFromReader(".", strings.NewReader(strings.Join(assert.patterns, "\n")))
+		if err != nil {
+			t.Errorf("Error %v: %v", assert, err)
+			continue
+		}
 		result := gi.Match(assert.file.path, assert.file.isDir)
 		if result != assert.expect {
 			t.Errorf("Match should return %t, got %t on %v", assert.expect, result, assert)
 		}
+	}
+}
+
+func TestFailMatch(t *testing.T) {
+	_, err := NewGitIgnoreFromReader(".", strings.NewReader("[a"))
+	if err == nil {
+		t.Errorf("Expected error on bad input")
 	}
 }

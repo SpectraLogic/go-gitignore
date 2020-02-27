@@ -15,7 +15,7 @@ type pattern struct {
 	onlyEqualizedPath bool
 }
 
-func newPattern(path string) pattern {
+func newPattern(path string) (*pattern, error) {
 	hasRootPrefix := path[0] == '/'
 	hasDirSuffix := path[len(path)-1] == '/'
 
@@ -27,23 +27,30 @@ func newPattern(path string) pattern {
 	var matcher pathMatcher
 	matchingPath := strings.Trim(path, "/")
 	if hasMeta(path) {
-		matcher = newGlobMatcher(matchingPath)
+		globMatcher, err := newGlobMatcher(matchingPath)
+		if err != nil {
+			return nil, err
+		}
+		matcher = globMatcher
 	} else {
 		matcher = simpleMatcher{path: matchingPath}
 	}
 
-	return pattern{
+	return &pattern{
 		hasRootPrefix: hasRootPrefix,
 		hasDirSuffix:  hasDirSuffix,
 		pathDepth:     pathDepth,
 		matcher:       matcher,
-	}
+	}, nil
 }
 
-func newPatternForEqualizedPath(path string) pattern {
-	pattern := newPattern(path)
+func newPatternForEqualizedPath(path string) (*pattern, error) {
+	pattern, err := newPattern(path)
+	if err != nil {
+		return nil, err
+	}
 	pattern.onlyEqualizedPath = true
-	return pattern
+	return pattern, nil
 }
 
 func (p pattern) match(path string, isDir bool) bool {

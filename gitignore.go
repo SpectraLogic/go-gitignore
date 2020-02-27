@@ -30,12 +30,12 @@ func NewGitIgnore(gitignore string, base ...string) (IgnoreMatcher, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
-	return NewGitIgnoreFromReader(path, file), nil
+	return NewGitIgnoreFromReader(path, file)
 }
 
-func NewGitIgnoreFromReader(path string, r io.Reader) gitIgnore {
+func NewGitIgnoreFromReader(path string, r io.Reader) (*gitIgnore, error) {
 	g := gitIgnore{
 		ignorePatterns: newIndexScanPatterns(),
 		acceptPatterns: newIndexScanPatterns(),
@@ -50,15 +50,21 @@ func NewGitIgnoreFromReader(path string, r io.Reader) gitIgnore {
 
 		line = fixPath(line)
 		if strings.HasPrefix(line, "!") {
-			g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
+			err := g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
+			if err != nil {
+				return nil, err
+			}
 		} else {
-			g.ignorePatterns.add(fixRootPrefix(line))
+			err := g.ignorePatterns.add(fixRootPrefix(line))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	return g
+	return &g, nil
 }
 
-func NewGitIgnoreFromStrings(path string, patterns []string) gitIgnore {
+func NewGitIgnoreFromStrings(path string, patterns []string) (*gitIgnore, error) {
 	g := gitIgnore{
 		ignorePatterns: newIndexScanPatterns(),
 		acceptPatterns: newIndexScanPatterns(),
@@ -71,12 +77,18 @@ func NewGitIgnoreFromStrings(path string, patterns []string) gitIgnore {
 		}
 		line = fixPath(line)
 		if strings.HasPrefix(line, "!") {
-			g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
+			err := g.acceptPatterns.add(fixRootPrefix(strings.TrimPrefix(line, "!")))
+			if err != nil {
+				return nil, err
+			}
 		} else {
-			g.ignorePatterns.add(fixRootPrefix(line))
+			err := g.ignorePatterns.add(fixRootPrefix(line))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	return g
+	return &g, nil
 }
 
 func (g gitIgnore) Match(path string, isDir bool) bool {

@@ -14,11 +14,11 @@ func newIndexScanPatterns() *indexScanPatterns {
 	}
 }
 
-func (ps *indexScanPatterns) add(pattern string) {
+func (ps *indexScanPatterns) add(pattern string) error {
 	if strings.HasPrefix(pattern, "/") {
-		ps.absolute.add(pattern)
+		return ps.absolute.add(pattern)
 	} else {
-		ps.relative.add(pattern)
+		return ps.relative.add(pattern)
 	}
 }
 
@@ -30,6 +30,6 @@ func (ps indexScanPatterns) match(path string, isDir bool) bool {
 }
 
 type scanStrategy interface {
-	add(pattern string)
+	add(pattern string) error
 	match(path string, isDir bool) bool
 }
